@@ -1,0 +1,243 @@
+"use client"
+
+import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
+import Link from 'next/link'
+
+// 1. Move arrays outside to prevent re-renders and map them easily
+const defaultImages = [
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+  "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6",
+  "https://images.unsplash.com/photo-1592078615290-033ee584e267"
+]
+
+const menuLinks = [
+  { title: "About", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6", href: "/about" },
+  { title: "Contact", image: "https://images.unsplash.com/photo-1592078615290-033ee584e267", href: "/contact" },
+  { title: "Studio Manifesto", image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", href: "/studio" }
+]
+
+// 2. Create a master array of unique images for the GSAP slider
+const allImages = Array.from(new Set([...defaultImages, ...menuLinks.map(l => l.image)]))
+
+export default function Menu({ isOpen, toggleMenu }) {
+  const overlayRef = useRef(null)
+  const floatingImageRef = useRef(null)
+  const imagesContainerRef = useRef(null) // Added ref for the image slider
+  const tl = useRef(null)
+  
+  const xMove = useRef(null)
+  const yMove = useRef(null)
+  
+  const [currentIdx, setCurrentIdx] = useState(0)
+  const [hoveredImage, setHoveredImage] = useState(null)
+  const [abujaTime, setAbujaTime] = useState("...")
+
+  const displayImage = hoveredImage || defaultImages[currentIdx]
+  const prevImageRef = useRef(displayImage) // Track the last viewed image
+
+  useEffect(() => {
+    const updateTime = () => {
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Africa/Lagos',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+      });
+      setAbujaTime(`${formatter.format(new Date())}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (hoveredImage) return; 
+    const timer = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % defaultImages.length)
+    }, 5000) 
+    return () => clearInterval(timer)
+  }, [hoveredImage])
+
+  // GSAP Menu Shutter Animation
+  useGSAP(() => {
+    xMove.current = gsap.quickTo(floatingImageRef.current, "left", { duration: 0.4, ease: "power3.out" })
+    yMove.current = gsap.quickTo(floatingImageRef.current, "top", { duration: 0.4, ease: "power3.out" })
+
+    tl.current = gsap.timeline({ paused: true })
+      .to(overlayRef.current, 
+        { y: "0%", duration: 0.6, ease: "power3.inOut" } 
+      )
+      .fromTo(".right-panel",
+        { height: "0%" },
+        { height: "100%", duration: 0.6, ease: "power3.inOut" },
+        "-=0.2"
+      )
+      .fromTo(".menu-text",
+        { y: "100%" },
+        { y: "0%", duration: 0.5, stagger: 0.08, ease: "power3.out" },
+        "-=0.4"
+      )
+  }, { scope: overlayRef }) 
+
+  // GSAP Image Slider Animation (Slides from bottom)
+  useGSAP(() => {
+    if (prevImageRef.current === displayImage) return;
+
+    const children = imagesContainerRef.current.children;
+    const currentImgIdx = allImages.indexOf(displayImage);
+    const prevImgIdx = allImages.indexOf(prevImageRef.current);
+
+    const currentEl = children[currentImgIdx];
+    const prevEl = prevImgIdx !== -1 ? children[prevImgIdx] : null;
+
+    // Push all unused images to the deep background
+    gsap.set(children, { zIndex: 0 });
+
+    // Lock the previous image in place behind the new one
+    if (prevEl) {
+      gsap.set(prevEl, { zIndex: 1, yPercent: 0 });
+    }
+
+    // Force new image below the screen, then slide it up to 0%
+    gsap.set(currentEl, { zIndex: 2, yPercent: 100 });
+    gsap.to(currentEl, {
+      yPercent: 0,
+      duration: 0.8,
+      ease: "expo.out" // Heavy, snappy mechanical ease
+    });
+
+    prevImageRef.current = displayImage;
+  }, { dependencies: [displayImage] })
+
+  useEffect(() => {
+    if (isOpen) {
+      tl.current?.play()
+    } else {
+      tl.current?.reverse()
+    }
+  }, [isOpen])
+
+  const handleMouseMove = (e) => {
+    xMove.current?.(e.clientX - 128) 
+    yMove.current?.(e.clientY - 80)  
+  }
+
+  const handleMouseEnter = (image) => {
+    setHoveredImage(image)
+    gsap.to(floatingImageRef.current, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" })
+  }
+
+  const handleMouseLeave = () => {
+    setHoveredImage(null)
+    gsap.to(floatingImageRef.current, { opacity: 0, scale: 0.8, duration: 0.3, ease: "power2.out" })
+  }
+
+  return (
+    <div 
+      ref={overlayRef}
+      className="fixed inset-0 z-[100] flex flex-col md:flex-row bg-[#E5E5E5] text-black font-sans overflow-hidden"
+      style={{ transform: "translateY(-100%)" }}
+    >
+      <div 
+        ref={floatingImageRef}
+        className="fixed top-0 left-0 z-[150] w-64 h-40 pointer-events-none overflow-hidden bg-neutral-900 shadow-2xl opacity-0 scale-75"
+      >
+        {hoveredImage && (
+          <Image 
+            src={hoveredImage} 
+            alt="Preview" 
+            fill 
+            sizes="256px" 
+            className="object-cover"
+          />
+        )}
+      </div>
+
+      <nav className="absolute top-0 w-full flex justify-between items-center p-2 uppercase font-mono text-sm tracking-widest z-50 pointer-events-none">
+        <div className="font-regular text-xl cursor-default w-24 pointer-events-auto mix-blend-difference text-white">
+          OD
+        </div>
+
+        <div className="hidden md:block text-xs opacity-80 text-center w-48 pointer-events-auto mix-blend-difference text-[#ffffff]">
+          ABUJA, NG <br/>
+          {abujaTime}
+        </div>
+
+        <button 
+          onClick={toggleMenu}
+          className="group relative overflow-hidden w-24 flex justify-end cursor-pointer hover:opacity-50 transition-opacity pointer-events-auto mix-blend-difference text-white"
+        >
+          CLOSE X
+        </button>
+      </nav>
+
+      <div className="w-full md:w-1/2 h-full flex flex-col relative z-10 bg-[#f4f4f4]">
+        <div className="flex-1 px-4 md:px-8 pt- md:pt-32 shrink-0">
+          <p className="text-[16px] md:text-base font-italic uppercase leading-tight max-w-lg">
+            ARCHITECTURE // INTERIOR & FURNITURE DESIGN
+          </p>
+        </div>
+
+        <div className="flex flex-col w-full border-t border-black mt-auto">
+          {menuLinks.map((link) => (
+            <Link 
+              key={link.title}
+              href={link.href}
+              onClick={toggleMenu} 
+              onMouseEnter={() => handleMouseEnter(link.image)}
+              onMouseLeave={handleMouseLeave}
+              onMouseMove={handleMouseMove}
+              className="group relative border-b border-black w-full overflow-hidden cursor-pointer bg-[#f4f4f4] hover:bg-black transition-colors duration-300 block"
+            >
+              <div className="p-4 md:p-6 lg:p-8 pointer-events-none">
+                <div className="overflow-hidden">
+                  <div className="menu-text flex items-center uppercase font-bold text-3xl md:text-5xl group-hover:text-white transition-colors duration-300">
+                    <span className="inline-block w-0 overflow-hidden group-hover:w-8 group-hover:mr-8 transition-all duration-300 ease-out">
+                      →
+                    </span>
+                    {link.title}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+
+          <div className="p-4 md:p-6 lg:p-8 text-sm font-mono uppercase tracking-widest border-b border-black hover:bg-black hover:text-white transition-colors duration-300 cursor-pointer">
+            <div className="overflow-hidden">
+              <div className="menu-text">
+                something something
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="hidden md:flex w-1/2 h-full bg-black relative justify-center items-end overflow-hidden">
+        {/* The new DOM structure for the slider */}
+        <div className="right-panel relative bottom-0 w-full h-full overflow-hidden" ref={imagesContainerRef}>
+          {allImages.map((src, idx) => (
+            <div 
+              key={idx}
+              className="absolute inset-0 w-full h-full"
+              // Set the exact starting position so the initial load doesn't flicker
+              style={{
+                zIndex: src === displayImage ? 2 : 0,
+                transform: src === displayImage ? "translateY(0%)" : "translateY(100%)"
+              }}
+            >
+              <Image 
+                src={src}
+                alt="Studio Work"
+                fill
+                sizes="50vw"
+                priority={idx === 0}
+                className="object-cover grayscale"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
