@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import TransitionLink from '@/components/TransitionLink'
 import { useParams } from 'next/navigation'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -63,9 +63,9 @@ export default function CategoryGallery() {
       
       {/* Absolute Header */}
       <nav className="fixed top-0 left-0 w-full p-4 md:p-8 z-50 pointer-events-none flex justify-between uppercase font-mono text-sm tracking-widest mix-blend-difference text-white">
-        <Link href="/" className="pointer-events-auto hover:opacity-50 transition-opacity">
+        <TransitionLink href="/" className="pointer-events-auto hover:opacity-50 transition-opacity">
           ← BACK TO INDEX
-        </Link>
+        </TransitionLink>
         <div className="hidden md:block">{categoryTitle}</div>
       </nav>
 

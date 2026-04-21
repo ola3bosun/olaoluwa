@@ -5,6 +5,7 @@ import Image from 'next/image'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import Link from 'next/link'
+import TransitionLink from './TransitionLink'
 
 // 1. Move arrays outside to prevent re-renders and map them easily
 const defaultImages = [
@@ -181,7 +182,7 @@ export default function Menu({ isOpen, toggleMenu }) {
 
         <div className="flex flex-col w-full border-t border-black mt-auto">
           {menuLinks.map((link) => (
-            <Link 
+            <TransitionLink 
               key={link.title}
               href={link.href}
               onClick={toggleMenu} 
@@ -200,7 +201,7 @@ export default function Menu({ isOpen, toggleMenu }) {
                   </div>
                 </div>
               </div>
-            </Link>
+            </TransitionLink>
           ))}
 
           <div className="p-4 md:p-6 lg:p-8 text-sm font-mono uppercase tracking-widest border-b border-black hover:bg-black hover:text-white transition-colors duration-300 cursor-pointer">

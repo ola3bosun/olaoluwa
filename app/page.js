@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import TransitionLink from "@/components/TransitionLink";
 import Menu from "../components/Menu";
 import TextPressure from "../components/TextPressure";
 import Navbar from "../components/Navbar";
@@ -62,7 +62,7 @@ export default function LandingPage() {
 
       <section className="relative z-20 h-[40vh] md:h-[45vh] shrink-0 grid grid-cols-1 md:grid-cols-3 w-full border-t border-black divide-y md:divide-y-0 md:divide-x divide-black">
         {categories.map((cat, index) => (
-          <Link
+          <TransitionLink
             key={index}
             href={`/categories/${cat.title.toLowerCase().replace(" ", "-")}`}
             // href={cat.href}
@@ -82,7 +82,7 @@ export default function LandingPage() {
               <span>{cat.title}</span>
               <span>[{cat.count}]</span>
             </div>
-          </Link>
+          </TransitionLink>
         ))}
       </section>
 
