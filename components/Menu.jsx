@@ -4,10 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
-import Link from 'next/link'
 import TransitionLink from './TransitionLink'
 
-// 1. Move arrays outside to prevent re-renders and map them easily
+// Move arrays outside to prevent re-renders and map them easily
 const defaultImages = [
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
   "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6",
@@ -20,13 +19,12 @@ const menuLinks = [
   { title: "Studio Manifesto", image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", href: "/studio" }
 ]
 
-// 2. Create a master array of unique images for the GSAP slider
 const allImages = Array.from(new Set([...defaultImages, ...menuLinks.map(l => l.image)]))
 
 export default function Menu({ isOpen, toggleMenu }) {
   const overlayRef = useRef(null)
   const floatingImageRef = useRef(null)
-  const imagesContainerRef = useRef(null) // Added ref for the image slider
+  const imagesContainerRef = useRef(null) 
   const tl = useRef(null)
   
   const xMove = useRef(null)
@@ -43,7 +41,7 @@ export default function Menu({ isOpen, toggleMenu }) {
     const updateTime = () => {
       const formatter = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Africa/Lagos',
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
       });
       setAbujaTime(`${formatter.format(new Date())}`);
     };
@@ -156,18 +154,19 @@ export default function Menu({ isOpen, toggleMenu }) {
       </div>
 
       <nav className="absolute top-0 w-full flex justify-between items-center p-2 uppercase font-mono text-sm tracking-widest z-50 pointer-events-none">
-        <div className="font-regular text-xl cursor-default w-24 pointer-events-auto mix-blend-difference text-white">
-          OD
-        </div>
+          <TransitionLink href="/" className="pointer-events-auto" >
+            OD
+          </TransitionLink>
+        
 
-        <div className="hidden md:block text-xs opacity-80 text-center w-48 pointer-events-auto mix-blend-difference text-[#ffffff]">
+        <div className="hidden md:block text-xs opacity-80 text-center w-48 pointer-events-auto mix-blend-difference text-[#000000]">
           ABUJA, NG <br/>
           {abujaTime}
         </div>
 
         <button 
           onClick={toggleMenu}
-          className="group relative overflow-hidden w-24 flex justify-end cursor-pointer hover:opacity-50 transition-opacity pointer-events-auto mix-blend-difference text-white"
+          className="group relative overflow-hidden w-fit flex justify-end cursor-pointer hover:opacity-50 transition-opacity pointer-events-auto mix-blend-difference text-white"
         >
           CLOSE X
         </button>
@@ -176,7 +175,7 @@ export default function Menu({ isOpen, toggleMenu }) {
       <div className="w-full md:w-1/2 h-full flex flex-col relative z-10 bg-[#f4f4f4]">
         <div className="flex-1 px-4 md:px-8 pt- md:pt-32 shrink-0">
           <p className="text-[16px] md:text-base font-italic uppercase leading-tight max-w-lg">
-            ARCHITECTURE // INTERIOR & FURNITURE DESIGN
+            Thanks for stopping by. I'm currently a designer based in Abuja, crafting architecture, interiors and furniture that respond to climate and craft. Feel free to explore the site and get in touch if you'd like to collaborate or just say hi.
           </p>
         </div>
 

@@ -83,9 +83,9 @@ export default function ContactPage() {
         
         {/* The Typographic Anchor Social Links */}
         <div className="w-full flex gap-6 md:gap-10 border-b-[3px] border-black pb-4 mb-6 font-mono text-xs md:text-sm uppercase tracking-widest">
-          <a href="#" className="">INSTAGRAM [↗]</a>
-          <a href="#" className="">LINKEDIN [↗]</a>
-          <a href="#" className="">TWITTER [↗]</a>
+          <a href="https://www.instagram.com/laollu_/" target="_blank" className="">INSTAGRAM [↗]</a>
+          <a href="https://www.linkedin.com/in/olaoluwa-diyaolu-435060345/" target="_blank" className="">LINKEDIN [↗]</a>
+          <a href="https://twitter.com/Blackolaoluwa" target="_blank" className="">TWITTER [↗]</a>
         </div>
 
         <h1 className="w-full flex flex-col uppercase font-bold tracking-tighter leading-[0.85] mb-2">

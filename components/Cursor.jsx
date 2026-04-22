@@ -5,7 +5,8 @@ import gsap from 'gsap'
 
 export default function Cursor() {
   const cursorRef = useRef(null)
-  const [isHovering, setIsHovering] = useState(false)
+  // 3-State Machine: 'default' | 'hover' | 'hidden'
+  const [cursorMode, setCursorMode] = useState('default')
 
   useEffect(() => {
     const cursor = cursorRef.current
@@ -22,47 +23,45 @@ export default function Cursor() {
     }
 
     const handleMouseOver = (e) => {
-      const target = e.target.closest('a, button, Link, .cursor-pointer')
-      if (target) setIsHovering(true)
-    }
-
-    const handleMouseOut = (e) => {
-      const target = e.target.closest('a, button, Link, .cursor-pointer')
-      if (target) setIsHovering(false)
+      // 1. If we enter the gallery's custom interaction zone, hide the global cursor
+      if (e.target.closest('.hide-global-cursor')) {
+        setCursorMode('hidden')
+        return
+      }
+      // 2. If we hover a link or button, do the hollow animation
+      if (e.target.closest('a, button, Link, .cursor-pointer')) {
+        setCursorMode('hover')
+        return
+      }
+      // 3. Otherwise, just be the default dot
+      setCursorMode('default')
     }
 
     window.addEventListener("mousemove", onMouseMove)
     window.addEventListener("mouseover", handleMouseOver)
-    window.addEventListener("mouseout", handleMouseOut)
 
     return () => {
       window.removeEventListener("mousemove", onMouseMove)
       window.removeEventListener("mouseover", handleMouseOver)
-      window.removeEventListener("mouseout", handleMouseOut)
     }
   }, [])
 
+  // Animate based on the current state
   useEffect(() => {
-    if (isHovering) {
+    if (cursorMode === 'hidden') {
       gsap.to(cursorRef.current, {
-        scale: 1.5,
-        rotation: 180,
-        backgroundColor: "transparent",
-        border: "1px solid white", 
-        duration: 0.4,
-        ease: "back.out(1.5)"
+        opacity: 0, scale: 0, duration: 0.3, ease: "power3.out"
+      })
+    } else if (cursorMode === 'hover') {
+      gsap.to(cursorRef.current, {
+        opacity: 1, scale: 1.5, rotation: 180, backgroundColor: "transparent", border: "1px solid white", duration: 0.4, ease: "back.out(1.5)"
       })
     } else {
       gsap.to(cursorRef.current, {
-        scale: 1,
-        rotation: 0,
-        backgroundColor: "white", 
-        border: "0px solid transparent",
-        duration: 0.3,
-        ease: "power3.out"
+        opacity: 1, scale: 1, rotation: 0, backgroundColor: "white", border: "0px solid transparent", duration: 0.3, ease: "power3.out"
       })
     }
-  }, [isHovering])
+  }, [cursorMode])
 
   return (
     <div

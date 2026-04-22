@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import TransitionLink from '@/components/TransitionLink'
+// import CanvasLogo from "./CanvasLogo";
 
 export default function Navbar({ onMenuClick }) {
   const [abujaTime, setAbujaTime] = useState("...");
@@ -24,7 +26,9 @@ export default function Navbar({ onMenuClick }) {
 
   return (
     <nav className="relative z-50 flex justify-between items-center p-4 md:px-4 md:pt-4 uppercase font-mono text-sm tracking-widest shrink-0 pointer-events-auto">
-      <div className="font-regular text-xl cursor-default w-24">OD</div>
+      <TransitionLink href="/" className="pointer-events-auto" >
+        OD
+      </TransitionLink>
       
       <div className="hidden md:block text-xs opacity-80 text-center w-48">
         ABUJA, NG <br />
@@ -32,7 +36,7 @@ export default function Navbar({ onMenuClick }) {
       </div>
       
       <button
-        className="group relative overflow-hidden w-24 flex justify-end cursor-pointer"
+        className="group relative overflow-hidden w-fit flex justify-end cursor-pointer"
         onClick={onMenuClick}
       >
         <div className="flex">

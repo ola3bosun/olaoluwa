@@ -23,7 +23,7 @@ export default function CategoryGallery() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // --- YOUR ACTUAL SANITY QUERY WILL GO HERE ---
+        // --- ACTUAL SANITY QUERY---
         // const query = `*[_type == "project" && category->slug.current == "${params.slug}"]{
         //   _id, title, location, year, "imageUrl": mainImage.asset->url
         // }`
@@ -39,7 +39,7 @@ export default function CategoryGallery() {
             { _id: 4, title: "Concrete Pavilion", location: "Kano", year: "2023", imageUrl: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1000" },
           ])
           setIsLoading(false)
-        }, 500) // Simulating network latency
+        }, 350) // Simulating network latency
       } catch (error) {
         console.error("Failed to fetch Sanity projects:", error)
       }
@@ -63,7 +63,7 @@ export default function CategoryGallery() {
       
       {/* Absolute Header */}
       <nav className="fixed top-0 left-0 w-full p-4 md:p-8 z-50 pointer-events-none flex justify-between uppercase font-mono text-sm tracking-widest mix-blend-difference text-white">
-        <TransitionLink href="/" className="pointer-events-auto hover:opacity-50 transition-opacity">
+        <TransitionLink href="/" className="pointer-events-auto">
           ← BACK TO INDEX
         </TransitionLink>
         <div className="hidden md:block">{categoryTitle}</div>
