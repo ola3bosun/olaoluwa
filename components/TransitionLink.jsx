@@ -17,7 +17,7 @@ export default function TransitionLink({ href, children, className, onClick, ...
     
     overlay.innerHTML = `
       <h1 class="text-white text-[12vw] md:text-[8vw] font-black uppercase tracking-tighter leading-none mix-blend-difference">
-        LOADING.
+        OLAOLUWA
       </h1>
     `
     document.body.appendChild(overlay)
@@ -37,7 +37,7 @@ export default function TransitionLink({ href, children, className, onClick, ...
       y: "-100%",
       duration: 0.5,
       ease: "expo.inOut",
-      delay: 0.2, 
+      delay: 1.5, 
       onComplete: () => {
         overlay.remove()
       }
