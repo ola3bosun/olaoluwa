@@ -6,7 +6,6 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import TransitionLink from './TransitionLink'
 
-// Move arrays outside to prevent re-renders and map them easily
 const defaultImages = [
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
   "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6",

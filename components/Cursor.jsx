@@ -5,7 +5,7 @@ import gsap from 'gsap'
 
 export default function Cursor() {
   const cursorRef = useRef(null)
-  // 3-State Machine: 'default' | 'hover' | 'hidden'
+  // 3-States: 'default' | 'hover' | 'hidden'
   const [cursorMode, setCursorMode] = useState('default')
 
   useEffect(() => {
@@ -23,17 +23,17 @@ export default function Cursor() {
     }
 
     const handleMouseOver = (e) => {
-      // 1. If we enter the gallery's custom interaction zone, hide the global cursor
+      // If we enter the gallery's custom interaction zone, hide the global cursor
       if (e.target.closest('.hide-global-cursor')) {
         setCursorMode('hidden')
         return
       }
-      // 2. If we hover a link or button, do the hollow animation
+      // If hover over a link or button, do the hollow animation
       if (e.target.closest('a, button, Link, .cursor-pointer')) {
         setCursorMode('hover')
         return
       }
-      // 3. Otherwise, just be the default dot
+      // Otherwise, just be the default dot
       setCursorMode('default')
     }
 
