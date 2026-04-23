@@ -12,7 +12,7 @@ gsap.registerPlugin(Observer)
 export default function GalleryPage() {
   const containerRef = useRef(null)
   
-  // DOM Refs
+  // Strict DOM Refs
   const imagesRef = useRef([])
   const textsRef = useRef([])
   const tabsRef = useRef([])
@@ -21,6 +21,8 @@ export default function GalleryPage() {
   
   // Animation & Tracking Refs
   const isAnimating = useRef(false)
+  const isCategoryTransition = useRef(false)
+  const currentIndexRef = useRef(0)
   const xMove = useRef(null)
   const yMove = useRef(null)
   
@@ -42,20 +44,15 @@ export default function GalleryPage() {
 
   const filteredProjects = allProjects.filter(p => p.category === activeCategory)
 
-  // 1. Context Cleanups: Reset indices and slice refs when category changes to prevent ghosting
-  useEffect(() => {
-    setCurrentIndex(0)
-    imagesRef.current = imagesRef.current.slice(0, filteredProjects.length)
-    textsRef.current = textsRef.current.slice(0, filteredProjects.length)
-  }, [activeCategory, filteredProjects.length])
+  // PREVENT GHOSTING: Strictly assign exact array length before render
+  imagesRef.current = new Array(filteredProjects.length).fill(null)
+  textsRef.current = new Array(filteredProjects.length).fill(null)
 
-  // 2. Custom Cursor Tracking Initialization
   useGSAP(() => {
     xMove.current = gsap.quickTo(cursorRef.current, "left", { duration: 0.4, ease: "power3.out" })
     yMove.current = gsap.quickTo(cursorRef.current, "top", { duration: 0.4, ease: "power3.out" })
   })
 
-  // 3. Sliding Category Underline Engine ("Magic Line")
   useGSAP(() => {
     const activeIdx = categories.indexOf(activeCategory)
     const activeTab = tabsRef.current[activeIdx]
@@ -70,136 +67,153 @@ export default function GalleryPage() {
     }
   }, [activeCategory])
 
-  // 4. GSAP Single Source of Truth: Visibility Initialization
+  // CATEGORY SWITCH LOGIC
+  const handleCategorySwitch = (targetCat) => {
+    if (targetCat === activeCategory || isAnimating.current) return
+    isAnimating.current = true
+    isCategoryTransition.current = true
+
+    const currentImg = imagesRef.current[currentIndexRef.current]
+    const currentText = textsRef.current[currentIndexRef.current]
+
+    // Slide outgoing items violently to the left
+    gsap.to([currentImg, currentText], {
+      xPercent: -100,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.inOut",
+      onComplete: () => {
+        // Only switch React state AFTER the exit animation finishes
+        currentIndexRef.current = 0
+        setCurrentIndex(0)
+        setActiveCategory(targetCat)
+      }
+    })
+  }
+
+  // INITIALIZATION & CATEGORY INCOMING ANIMATION
   useGSAP(() => {
-    // Force everything to be completely hidden
     gsap.set(imagesRef.current, { opacity: 0, zIndex: 0, clearProps: "transform" })
-    gsap.set(textsRef.current, { opacity: 0, zIndex: 0, yPercent: 100 })
+    gsap.set(textsRef.current, { opacity: 0, zIndex: 0, clearProps: "transform", yPercent: 100 })
     
-    // Explicitly reveal only the current index
-    if (imagesRef.current[currentIndex] && textsRef.current[currentIndex]) {
-      gsap.set(imagesRef.current[currentIndex], { opacity: 1, zIndex: 1 })
-      gsap.set(textsRef.current[currentIndex], { opacity: 1, zIndex: 1, yPercent: 0 })
+    const firstImg = imagesRef.current[0]
+    const firstText = textsRef.current[0]
+
+    if (firstImg && firstText) {
+      if (isCategoryTransition.current) {
+        // If we are arriving from a category switch, slide in from the right
+        gsap.fromTo(firstImg, 
+          { xPercent: 100, opacity: 0, zIndex: 1 }, 
+          { xPercent: 0, opacity: 1, duration: 0.8, ease: "power3.inOut" }
+        )
+        gsap.fromTo(firstText,
+          { xPercent: 100, opacity: 0, zIndex: 1, yPercent: 0 },
+          { xPercent: 0, opacity: 1, duration: 0.8, ease: "power3.inOut", 
+            onComplete: () => {
+              isAnimating.current = false
+              isCategoryTransition.current = false
+            }
+          }
+        )
+      } else {
+        // Standard hard-load reveal
+        gsap.set(firstImg, { opacity: 1, zIndex: 1 })
+        gsap.set(firstText, { opacity: 1, zIndex: 1, yPercent: 0 })
+      }
     }
   }, { dependencies: [activeCategory], scope: containerRef })
 
-  // 5. The Master Slide Engine (Shared by Scroll and Clicks)
+  // MASTER VERTICAL SLIDE ENGINE
   const gotoSlide = (targetIndex, direction) => {
-    if (isAnimating.current || targetIndex === currentIndex) return
+    if (isAnimating.current || targetIndex === currentIndexRef.current) return
     isAnimating.current = true
 
-    const currentImg = imagesRef.current[currentIndex]
+    const currentImg = imagesRef.current[currentIndexRef.current]
     const nextImg = imagesRef.current[targetIndex]
-    const currentText = textsRef.current[currentIndex]
+    const currentText = textsRef.current[currentIndexRef.current]
     const nextText = textsRef.current[targetIndex]
 
     const tl = gsap.timeline({
       onComplete: () => {
+        currentIndexRef.current = targetIndex
         setCurrentIndex(targetIndex)
         isAnimating.current = false
       }
     })
 
-    // Outgoing Sequence (Image & Text)
-    tl.to(currentImg, {
-      yPercent: direction * -15, 
-      scale: 0.85,
-      opacity: 0,
-      duration: 1,
-      ease: "power3.inOut"
-    }, 0)
+    // Outgoing Vertical
+    tl.to(currentImg, { yPercent: direction * -15, scale: 0.85, opacity: 0, duration: 1, ease: "power3.inOut" }, 0)
+    tl.to(currentText, { yPercent: direction * -100, opacity: 0, duration: 0.8, ease: "power3.inOut" }, 0)
 
-    tl.to(currentText, {
-      yPercent: direction * -100,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.inOut"
-    }, 0)
+    // Incoming Setup
+    gsap.set(nextImg, { yPercent: direction * 15, xPercent: 0, scale: 1.15, opacity: 0, zIndex: 10 })
+    gsap.set(nextText, { yPercent: direction * 100, xPercent: 0, opacity: 0, zIndex: 10 })
 
-    // Incoming Sequence Setup
-    gsap.set(nextImg, {
-      yPercent: direction * 15,
-      scale: 1.15,
-      opacity: 0,
-      zIndex: 10 
-    })
+    // Incoming Vertical
+    tl.to(nextImg, { yPercent: 0, scale: 1, opacity: 1, duration: 1, ease: "power3.inOut" }, 0)
+    tl.to(nextText, { yPercent: 0, opacity: 1, duration: 1, ease: "power3.out" }, 0.2)
 
-    gsap.set(nextText, {
-      yPercent: direction * 100,
-      opacity: 0,
-      zIndex: 10
-    })
-
-    // Incoming Sequence Animation
-    tl.to(nextImg, {
-      yPercent: 0,
-      scale: 1,
-      opacity: 1,
-      duration: 1,
-      ease: "power3.inOut"
-    }, 0)
-
-    tl.to(nextText, {
-      yPercent: 0,
-      opacity: 1,
-      duration: 1,
-      ease: "power3.out"
-    }, 0.2) // Slight delay on the text snap for physical weight
-
-    tl.set(currentImg, { zIndex: 0 })
-    tl.set(currentText, { zIndex: 0 })
+    tl.set([currentImg, currentText], { zIndex: 0 })
   }
 
-  // 6. Scroll Observer with Infinite Loop
+  // EVENT BINDINGS (Scroll & Arrows)
   useGSAP(() => {
+    const handleNext = () => {
+      const nextIdx = (currentIndexRef.current + 1) % filteredProjects.length
+      gotoSlide(nextIdx, 1)
+    }
+
+    const handlePrev = () => {
+      const prevIdx = (currentIndexRef.current - 1 + filteredProjects.length) % filteredProjects.length
+      gotoSlide(prevIdx, -1)
+    }
+
+    // 1. Observer Engine
     const observer = Observer.create({
       target: containerRef.current,
       type: "wheel,touch,pointer",
       wheelSpeed: -1,
-      tolerance: 10,
+      tolerance: 40, // Increased tolerance to stop trackpad twitching
       preventDefault: true,
-      onUp: () => {
-        // Infinite Loop Forward
-        const nextIdx = (currentIndex + 1) % filteredProjects.length
-        gotoSlide(nextIdx, 1)
-      },   
-      onDown: () => {
-        // Infinite Loop Backward
-        const prevIdx = (currentIndex - 1 + filteredProjects.length) % filteredProjects.length
-        gotoSlide(prevIdx, -1)
-      } 
+      onUp: handleNext,   
+      onDown: handlePrev 
     })
-    return () => observer.kill()
-  }, { dependencies: [currentIndex, filteredProjects], scope: containerRef })
 
-  // Cursor Hover Handlers
+    // 2. Arrow Keys Engine
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowDown') handleNext()
+      if (e.key === 'ArrowUp') handlePrev()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      observer.kill()
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, { dependencies: [activeCategory], scope: containerRef }) // Only rebuild bindings if the category data changes entirely
+
+  // Mouse Overlays
   const handleMouseMove = (e) => {
     xMove.current?.(e.clientX) 
     yMove.current?.(e.clientY)  
   }
-
   const handleMouseEnter = () => {
     gsap.to(cursorRef.current, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" })
   }
-
   const handleMouseLeave = () => {
     gsap.to(cursorRef.current, { opacity: 0, scale: 0.5, duration: 0.3, ease: "power2.out" })
   }
 
   return (
-    <main 
-      ref={containerRef}
-      className="h-screen w-screen bg-black text-white overflow-hidden relative font-sans flex flex-col select-none"
-    >
+    <main ref={containerRef} className="h-screen w-screen bg-black text-white overflow-hidden relative font-sans flex flex-col select-none">
       
       {/* 1. ABSOLUTE FULL-BLEED IMAGES */}
       <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
         {filteredProjects.map((project, idx) => (
           <div 
             key={`img-${project._id}`}
-            ref={(el) => { imagesRef.current[idx] = el }}
+            ref={(el) => { if (el) imagesRef.current[idx] = el }}
             className="absolute inset-0 w-full h-full"
-            // NO INLINE OPACITY STYLES HERE. GSAP handles it.
           >
             <Image 
               src={project.imageUrl}
@@ -223,17 +237,13 @@ export default function GalleryPage() {
         </div>
 
         <div className="relative flex gap-4 md:gap-8 text-[10px] md:text-sm font-bold pointer-events-auto drop-shadow-md pb-2">
-          {/* Sliding Indicator */}
-          <div 
-            ref={indicatorRef} 
-            className="absolute bottom-0 h-[2px] bg-white pointer-events-none" 
-          />
+          <div ref={indicatorRef} className="absolute bottom-0 h-[2px] bg-white pointer-events-none" />
           
           {categories.map((cat, i) => (
             <button 
               key={cat}
               ref={el => tabsRef.current[i] = el}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => handleCategorySwitch(cat)}
               className={`transition-opacity duration-300 ${activeCategory === cat ? 'opacity-100' : 'opacity-40 hover:opacity-100'}`}
             >
               {cat}
@@ -246,7 +256,7 @@ export default function GalleryPage() {
         </div>
       </nav>
 
-      {/* 3. FLOATING LEFT THUMBNAILS (MONOCHROME INACTIVE / COLORED ACTIVE) */}
+      {/* 3. FLOATING LEFT THUMBNAILS */}
       <div className="absolute left-0 top-0 h-full hidden md:flex flex-col justify-center pl-8 gap-4 w-[12%] z-20 pointer-events-none">
         {filteredProjects.map((project, idx) => {
           const isActive = idx === currentIndex;
@@ -254,8 +264,7 @@ export default function GalleryPage() {
             <button
               key={`thumb-${project._id}`}
               onClick={() => {
-                // Calculate shortest path for infinite click loop if you want, or just standard distance
-                const direction = idx > currentIndex ? 1 : -1;
+                const direction = idx > currentIndexRef.current ? 1 : -1;
                 gotoSlide(idx, direction);
               }}
               className={`relative w-full aspect-[4/3] rounded-md overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.76,0,0.24,1)] cursor-pointer pointer-events-auto ${
@@ -279,9 +288,8 @@ export default function GalleryPage() {
         {filteredProjects.map((project, idx) => (
           <div 
             key={`data-${project._id}`}
-            ref={el => textsRef.current[idx] = el}
+            ref={el => { if (el) textsRef.current[idx] = el }}
             className="absolute bottom-8 right-8 flex flex-col items-end text-right font-mono text-xs md:text-sm uppercase tracking-widest text-white drop-shadow-md"
-            // NO INLINE OPACITY STYLES HERE. GSAP handles it.
           >
             <span className="font-bold text-xl md:text-3xl mb-1">{project.title}</span>
             <span className="opacity-80">{project.location}</span>
