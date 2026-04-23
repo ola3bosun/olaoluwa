@@ -15,7 +15,7 @@ export default function Studio() {
 
       <div className="flex-1 w-full p-4 md:p-8">
         <h1 className="uppercase text-5xl md:text-7xl font-bold tracking-tighter">
-          ABOUT THE STUDIO.
+          SHOP.
         </h1>
       </div>
 
