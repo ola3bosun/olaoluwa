@@ -15,7 +15,7 @@ const defaultImages = [
 const menuLinks = [
   { title: "About", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6", href: "/about" },
   { title: "Contact", image: "https://images.unsplash.com/photo-1592078615290-033ee584e267", href: "/contact" },
-  { title: "Studio Manifesto", image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", href: "/studio" }
+  { title: "Shop", image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", href: "/studio" }
 ]
 
 const allImages = Array.from(new Set([...defaultImages, ...menuLinks.map(l => l.image)]))
