@@ -15,10 +15,43 @@ const defaultImages = [
 const menuLinks = [
   { title: "About", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6", href: "/about" },
   { title: "Contact", image: "https://images.unsplash.com/photo-1592078615290-033ee584e267", href: "/contact" },
-  { title: "Shop", image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", href: "/studio" }
+  { title: "Shop", image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", href: "/shop" } // Updated to /shop
 ]
 
 const allImages = Array.from(new Set([...defaultImages, ...menuLinks.map(l => l.image)]))
+
+// --- THE STAGGERED TEXT ENGINE ---
+const AnimatedMenuText = ({ text }) => {
+  return (
+    <div className="relative flex overflow-hidden">
+      {/* 1. Default Layer: Bold Sans-Serif (Pushes UP on hover) */}
+      <div className="flex">
+        {text.split('').map((char, idx) => (
+          <span
+            key={`sans-${idx}`}
+            className="font-sans font-black uppercase inline-block transition-transform duration-700 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-full"
+            style={{ transitionDelay: `${idx * 0.02}s` }}
+          >
+            {char === ' ' ? '\u00A0' : char}
+          </span>
+        ))}
+      </div>
+
+      {/* 2. Hover Layer: Elegant Serif (Pulls UP from below on hover) */}
+      <div className="absolute top-0 left-0 flex text-[#E5E5E5]">
+        {text.split('').map((char, idx) => (
+          <span
+            key={`serif-${idx}`}
+            className="font-serif italic font-light lowercase inline-block transition-transform duration-700 ease-[cubic-bezier(0.76,0,0.24,1)] translate-y-full group-hover:translate-y-0"
+            style={{ transitionDelay: `${idx * 0.02}s` }}
+          >
+            {char === ' ' ? '\u00A0' : char}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function Menu({ isOpen, toggleMenu }) {
   const overlayRef = useRef(null)
@@ -34,7 +67,7 @@ export default function Menu({ isOpen, toggleMenu }) {
   const [abujaTime, setAbujaTime] = useState("...")
 
   const displayImage = hoveredImage || defaultImages[currentIdx]
-  const prevImageRef = useRef(displayImage) // Track the last viewed image
+  const prevImageRef = useRef(displayImage)
 
   useEffect(() => {
     const updateTime = () => {
@@ -71,7 +104,7 @@ export default function Menu({ isOpen, toggleMenu }) {
         { height: "100%", duration: 0.6, ease: "power3.inOut" },
         "-=0.2"
       )
-      .fromTo(".menu-text",
+      .fromTo(".menu-text-stagger",
         { y: "100%" },
         { y: "0%", duration: 0.5, stagger: 0.08, ease: "power3.out" },
         "-=0.4"
@@ -89,20 +122,17 @@ export default function Menu({ isOpen, toggleMenu }) {
     const currentEl = children[currentImgIdx];
     const prevEl = prevImgIdx !== -1 ? children[prevImgIdx] : null;
 
-    // Push all unused images to the deep background
     gsap.set(children, { zIndex: 0 });
 
-    // Lock the previous image in place behind the new one
     if (prevEl) {
       gsap.set(prevEl, { zIndex: 1, yPercent: 0 });
     }
 
-    // Force new image below the screen, then slide it up to 0%
     gsap.set(currentEl, { zIndex: 2, yPercent: 100 });
     gsap.to(currentEl, {
       yPercent: 0,
       duration: 0.8,
-      ease: "expo.out" // Heavy, snappy mechanical ease
+      ease: "expo.out" 
     });
 
     prevImageRef.current = displayImage;
@@ -157,7 +187,6 @@ export default function Menu({ isOpen, toggleMenu }) {
             OD
           </TransitionLink>
         
-
         <div className="hidden md:block text-xs opacity-80 text-center w-48 pointer-events-auto mix-blend-difference text-[#000000]">
           ABUJA, NG <br/>
           {abujaTime}
@@ -174,7 +203,7 @@ export default function Menu({ isOpen, toggleMenu }) {
       <div className="w-full md:w-1/2 h-full flex flex-col relative z-10 bg-[#f4f4f4]">
         <div className="flex-1 px-4 md:px-8 pt- md:pt-32 shrink-0">
           <p className="text-[16px] md:text-base font-italic uppercase leading-tight max-w-lg">
-            Thanks for stopping by. I'm currently a designer based in Abuja, crafting architecture, interiors and furniture that respond to climate and craft. Feel free to explore the site and get in touch if you'd like to collaborate or just say hi.
+            Thanks for stopping by. I'm currently a designer based in Abuja, crafting architecture, interiors and furniture that respond to climate and craft. Feel free to explore the site and get in touch if you'd like to collaborate or just say hi.oh, I do photography in my leisure time too. Check out the shop for prints and pieces of my projects.
           </p>
         </div>
 
@@ -187,25 +216,27 @@ export default function Menu({ isOpen, toggleMenu }) {
               onMouseEnter={() => handleMouseEnter(link.image)}
               onMouseLeave={handleMouseLeave}
               onMouseMove={handleMouseMove}
-              className="group relative border-b border-black w-full overflow-hidden cursor-pointer bg-[#f4f4f4] hover:bg-black transition-colors duration-300 block"
+              className="group relative border-b border-black w-full overflow-hidden cursor-pointer bg-[#f4f4f4] hover:bg-black transition-colors duration-500 block"
             >
-              <div className="p-4 md:p-6 lg:p-8 pointer-events-none">
+              <div className="p-4 md:p-6 lg:p-8 pointer-events-none flex items-center">
                 <div className="overflow-hidden">
-                  <div className="menu-text flex items-center uppercase font-bold text-3xl md:text-5xl group-hover:text-white transition-colors duration-300">
-                    <span className="inline-block w-0 overflow-hidden group-hover:w-8 group-hover:mr-8 transition-all duration-300 ease-out">
-                      →
-                    </span>
-                    {link.title}
+                  
+                  <div className="menu-text-stagger flex items-center text-3xl md:text-5xl">
+                    <AnimatedMenuText text={link.title} />
                   </div>
+
                 </div>
               </div>
             </TransitionLink>
           ))}
 
-          <div className="p-4 md:p-6 lg:p-8 text-sm font-mono uppercase tracking-widest border-b border-black hover:bg-black hover:text-white transition-colors duration-300 cursor-pointer">
+          <div className="p-4 md:p-6 lg:p-8 text-sm font-mono uppercase tracking-widest border-b border-black hover:bg-black hover:text-white transition-colors duration-500 cursor-pointer group">
             <div className="overflow-hidden">
-              <div className="menu-text">
-                something something
+              <div className="menu-text-stagger flex items-center">
+                <span className="inline-block w-0 overflow-hidden group-hover:w-4 group-hover:mr-2 transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] text-[#E5E5E5]">
+                  →
+                </span>
+                ANYTHING ELSE?
               </div>
             </div>
           </div>
@@ -213,13 +244,11 @@ export default function Menu({ isOpen, toggleMenu }) {
       </div>
 
       <div className="hidden md:flex w-1/2 h-full bg-black relative justify-center items-end overflow-hidden">
-        {/* The new DOM structure for the slider */}
         <div className="right-panel relative bottom-0 w-full h-full overflow-hidden" ref={imagesContainerRef}>
           {allImages.map((src, idx) => (
             <div 
               key={idx}
               className="absolute inset-0 w-full h-full"
-              // Set the exact starting position so the initial load doesn't flicker
               style={{
                 zIndex: src === displayImage ? 2 : 0,
                 transform: src === displayImage ? "translateY(0%)" : "translateY(100%)"

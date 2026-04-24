@@ -12,8 +12,8 @@
 }
 
 * {
-  scrollbar-width: thin;
-  scrollbar-color: #000 #e5e5e5;
-  /* cursor: none; */
+  /* scrollbar-width: thin; */
+  /* scrollbar-color:  #e5e5e5; */
+  cursor: none;
 }
 

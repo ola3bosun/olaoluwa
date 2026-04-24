@@ -16,12 +16,12 @@ export default function ParticleFooter() {
     const config = {
       text: 'OLAOLUWA',
       density: 5,        // Lower = more particles (heavier performance). 4 is a good balance.
-      radius: 70,       // Mouse interaction radius
-      repelForce: 5,     // Violent push away from the cursor
-      spring: 0.15,      // Snaps back quickly
-      friction: 0.75,    // Slides slightly before stopping
+      radius: 100,       // Mouse interaction radius
+      repelForce: 10,     // Violent push away from the cursor
+      spring: 0.25,      // Snaps back quickly
+      friction: 0.85,    // Slides slightly before stopping
       color: '#f4f4f4',  // Off-white to match your site's bright theme
-      fontSize: 220,     // Massive typography
+      fontSize: 200,     // Massive typography
       fontFamily: 'serif',
       fontWeight: '600'
     }
@@ -138,7 +138,7 @@ export default function ParticleFooter() {
        
           <canvas 
             ref={canvasRef} 
-            className="w-full h-auto object-contain mix-blend-difference hover:opacity-80 transition-opacity"
+            className="w-full h-auto object-contain mix-blend-difference"
             style={{ imageRendering: 'pixelated' }} 
           />
 
@@ -149,12 +149,12 @@ export default function ParticleFooter() {
         <span>© {new Date().getFullYear()}</span>
         
         <div className="flex gap-8 mt-4 md:mt-0 pointer-events-auto">
-          <a href="#" className="hover:text-white transition-colors">IG</a>
-          <a href="#" className="hover:text-white transition-colors">LN</a>
-          <a href="#" className="hover:text-white transition-colors">X</a>
+          <a target="_blank" href="https://instagram.com/laollu_" className="hover:text-white transition-colors">IG</a>
+          <a target="_blank" href="https://linkedin.com/in/olaoluwa-diyaolu" className="hover:text-white transition-colors">LN</a>
+          <a target="_blank" href="https://twitter.com/Blackolaoluwa" className="hover:text-white transition-colors">X</a>
         </div>
 
-        <span className="hidden md:block">FOR OLAOLUWA <br /> BY 'TUBOSUN</span>
+        <span className="hidden md:block">FOR OLAOLUWA</span>
       </div>
       
     </section>
