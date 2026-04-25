@@ -296,13 +296,13 @@ export default function GalleryClient({ initialProjects }) {
                 isActive ? 'opacity-100 scale-110 shadow-2xl shadow-black/50 grayscale-0' : 'opacity-30 scale-95 hover:opacity-70 grayscale'
               }`}
             >
-              <Image 
-                src={project.imageUrl}
-                alt={project.title}
-                fill
-                sizes="12vw"
-                className="object-cover"
-              />
+             <Image 
+              src={project.imageUrl}
+              alt={project.title}
+              fill
+              sizes="(max-width: 768px) 30vw, 15vw" // Mobile gets 30%, Desktop gets 15%
+              className="object-cover"
+            />
             </button>
           )
         })}

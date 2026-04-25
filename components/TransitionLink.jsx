@@ -1,51 +1,32 @@
 "use client"
 
-import { useRouter } from 'next/navigation'
-import gsap from 'gsap'
+import { usePathname } from 'next/navigation'
 
-export default function TransitionLink({ href, children, className, onClick, ...props }) {
-  const router = useRouter()
+export default function TransitionLink({ href, children, className, onClick, onMouseEnter, onMouseLeave, onMouseMove }) {
+  const pathname = usePathname()
 
-  const handleTransition = (e) => {
+  const handleClick = (e) => {
     e.preventDefault()
     
+    // If you passed an onClick (like toggleMenu to close the mobile menu), run it first
     if (onClick) onClick(e)
 
-    const overlay = document.createElement('div')
-    overlay.className = "fixed inset-0 bg-black z-[9999] flex items-center justify-center pointer-events-none"
-    overlay.style.transform = "translateY(100%)"
-    
-    overlay.innerHTML = `
-      <h1 class="text-white text-[12vw] md:text-[8vw] font-black uppercase tracking-tighter leading-none mix-blend-difference">
-        OLAOLUWA
-      </h1>
-    `
-    document.body.appendChild(overlay)
+    // Don't animate if the user clicks a link to the page they are already on
+    if (pathname === href) return
 
-    const tl = gsap.timeline()
-
-    tl.to(overlay, {
-      y: "0%",
-      duration: 0.5,
-      ease: "expo.inOut",
-      onComplete: () => {
-        router.push(href)
-      }
-    })
-
-    tl.to(overlay, {
-      y: "-100%",
-      duration: 0.5,
-      ease: "expo.inOut",
-      delay: 1.5, 
-      onComplete: () => {
-        overlay.remove()
-      }
-    })
+    // Fire the global transition event!
+    window.dispatchEvent(new CustomEvent('trigger-transition', { detail: href }))
   }
 
   return (
-    <a href={href} onClick={handleTransition} className={className} {...props}>
+    <a 
+      href={href} 
+      onClick={handleClick} 
+      className={className}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onMouseMove={onMouseMove}
+    >
       {children}
     </a>
   )

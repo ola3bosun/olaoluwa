@@ -7,7 +7,7 @@ export default function ConditionalNavbar({ settings }) {
   const pathname = usePathname()
 
   // If the user is on the gallery page, render nothing
-  if (pathname === '/gallery' || pathname === '/contact' || pathname === '/shop') {
+  if (pathname === '/gallery' || pathname === '/contact' || pathname === '/shop' || pathname.startsWith('/project/')) {
     return null
   }
 

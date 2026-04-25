@@ -1,114 +1,113 @@
 "use client"
 
-import { useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
 
 export default function Preloader() {
+  const [isComplete, setIsComplete] = useState(false)
+  
   const containerRef = useRef(null)
+  const counterRef = useRef(null)
+  const barRef = useRef(null)
+  const textRef = useRef(null)
 
-  const rows = [...Array(7)]
-  const textGroup = [...Array(8)].fill("OLAOLUWA")
+  useEffect(() => {
+    // 1. Lock the scroll so the user can't move during loading
+    document.body.style.overflow = 'hidden'
 
-  useGSAP(() => {
-    // 1. Base Marquee Speed (Slowed down from 4s to 12s for readability)
-    const leftLoop = gsap.to(".marquee-left", {
-      xPercent: -50,
-      ease: "none",
-      duration: 12,
-      repeat: -1
-    })
+    // 2. The GSAP Context
+    const ctx = gsap.context(() => {
+      
+      // We animate a dummy object to drive the numbers
+      const progress = { value: 0 }
 
-    const rightLoop = gsap.fromTo(".marquee-right", 
-      { xPercent: -50 },
-      { xPercent: 0, ease: "none", duration: 12, repeat: -1 }
-    )
+      // The Main Loading Timeline
+      const tl = gsap.timeline({
+        onComplete: () => {
+          // 3. The Exit Sequence
+          const exitTl = gsap.timeline({
+            onComplete: () => {
+              document.body.style.overflow = 'auto' // Unlock scroll
+              setIsComplete(true) // Unmount component
+            }
+          })
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        gsap.set(containerRef.current, { display: "none" })
-        document.body.style.overflow = "auto" 
+          exitTl
+            .to(textRef.current, { opacity: 0, y: -20, duration: 0.4, ease: "power2.in" })
+            .to(barRef.current, { scaleY: 0, transformOrigin: "top", duration: 0.4, ease: "power2.in" }, "-=0.2")
+            .to(containerRef.current, {
+              yPercent: -100, // Violent slide up to reveal the site
+              duration: 1.2,
+              ease: "expo.inOut"
+            }, "-=0.2")
+        }
+      })
+
+      // Animate the counter from 0 to 100
+      tl.to(progress, {
+        value: 100,
+        duration: 2, // Base duration (adjust this to feel right)
+        ease: "power2.out", // Fast at first, slows down at the end
+        onUpdate: () => {
+          if (counterRef.current) {
+            // Update the DOM with the rounded number
+            counterRef.current.innerHTML = Math.round(progress.value)
+          }
+        }
+      })
+
+      // Animate the loading bar width alongside the numbers
+      tl.fromTo(barRef.current, 
+        { scaleX: 0 },
+        { scaleX: 1, duration: 2, ease: "power2.out", transformOrigin: "left" },
+        0 // Start at exactly the same time as the counter
+      )
+
+      // Fallback: If the window is already fully loaded, speed up the timeline
+      if (document.readyState === 'complete') {
+        tl.timeScale(2) // Run twice as fast
+      } else {
+        window.addEventListener('load', () => {
+          tl.timeScale(2) // Speed up to finish the animation when the window finishes loading
+        })
       }
-    })
+    }, containerRef)
 
-    document.body.style.overflow = "hidden"
+    return () => ctx.revert()
+  }, [])
 
-    // Fade in the text slowly
-    tl.fromTo(".marquee-container", 
-      { opacity: 0 }, 
-      { opacity: 1, duration: 1, ease: "power2.out" }
-    )
-
-    // THE ACCELERATION: Build tension smoothly over 2.5 seconds
-    tl.to([leftLoop, rightLoop], {
-      timeScale: 2, // Capped at 2x so it doesn't turn into a blur
-      duration: 2.5,
-      ease: "power3.in"
-    }, 1.5)
-
-    // THE SNAP: The sudden stop
-    tl.add(() => {
-      leftLoop.pause()
-      rightLoop.pause()
-    }, 4)
-
-    // Instantly hide chaos, reveal center word
-    tl.to(".marquee-container", { opacity: 0, duration: 0.5 }, 5.5)
-
-
-    // THE EXIT
-
-    tl.to(".bg-panel", {
-      yPercent: -100,
-      duration: 1.5,
-      ease: "expo.inOut"
-    }, 5.2)
-
-  }, { scope: containerRef })
+  // Once the exit animation finishes, remove this component from the DOM completely
+  if (isComplete) return null
 
   return (
     <div 
       ref={containerRef} 
-      className="fixed inset-0 z-[9999] flex flex-col justify-center items-center pointer-events-none overflow-hidden"
+      className="fixed inset-0 z-999 bg-[#111111] text-[#E5E5E5] flex flex-col justify-end p-4 md:p-8 font-mono select-none"
     >
-      <div className="absolute inset-0 bg-black bg-panel z-0" />
-      
-      <div className="marquee-container absolute inset-0 flex flex-col justify-center gap-2 md:gap-4 z-10 opacity-0 -rotate-2 scale-110">
-        {rows.map((_, i) => (
-          <div 
-            key={i} 
-            className={`flex w-max ${i % 2 === 0 ? 'marquee-left' : 'marquee-right'}`}
-          >
-            <div className="flex gap-4 md:gap-8 text-[12vw] md:text-[8vw] font-black uppercase tracking-tighter leading-none">
-              {textGroup.map((text, j) => (
-                <span 
-                  key={j} 
-                  className={i % 2 !== 0 
-                    ? "text-transparent [-webkit-text-stroke:2px_white] opacity-40" 
-                    : "text-white opacity-20"
-                  }
-                >
-                  {text}
-                </span>
-              ))}
-            </div>
-            <div className="flex gap-4 md:gap-8 text-[12vw] md:text-[8vw] font-black uppercase tracking-tighter leading-none pl-4 md:pl-8">
-              {textGroup.map((text, j) => (
-                <span 
-                  key={j} 
-                  className={i % 2 !== 0 
-                    ? "text-transparent [-webkit-text-stroke:2px_white] opacity-40" 
-                    : "text-white opacity-20"
-                  }
-                >
-                  {text}
-                </span>
-              ))}
-            </div>
+      <div className="w-full flex flex-col" ref={textRef}>
+        
+        <div className="w-full flex justify-between items-end mb-4">
+          <div className="text-xs uppercase tracking-widest opacity-50 flex flex-col">
+            <span>OLAOLUWA DIYAOLU</span>
+            <span>LOADING EXPERIENCE</span>
           </div>
-        ))}
+          
+          <div className="text-5xl md:text-8xl font-black tracking-tighter leading-none flex items-baseline">
+            <span ref={counterRef}>0</span>
+            <span className="text-lg md:text-2xl ml-1 opacity-50">%</span>
+          </div>
+        </div>
+
+        {/* The thin tracking bar */}
+        <div className="w-full h-px bg-white/20 relative">
+          <div 
+            ref={barRef} 
+            className="absolute top-0 left-0 w-full h-full bg-white origin-left" 
+            style={{ transform: "scaleX(0)" }}
+          />
+        </div>
+        
       </div>
-      
     </div>
   )
 }

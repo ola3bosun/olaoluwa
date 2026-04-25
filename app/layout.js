@@ -2,6 +2,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import Cursor from '../components/Cursor'
 import PreLoader from '../components/Preloader'
+import PageTransition from '../components/PageTransition'
 
 // 1. IMPORT SANITY & NAVBAR
 import { client } from '@/sanity/client'
@@ -33,8 +34,8 @@ export default async function RootLayout({ children }) {
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased bg-[#E5E5E5] text-black overflow-hidden`}>
         <PreLoader />
+        <PageTransition />
         <Cursor />
-        
         {/* Inject the global Navbar and pass the settings down */}
         <ConditionalNavbar settings={settings} />
         
