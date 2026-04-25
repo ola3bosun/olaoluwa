@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import Lenis from 'lenis'
 
-import Navbar from '@/components/Navbar'
+// import Navbar from '@/components/Navbar'
 import ParticleFooter from '@/components/ParticleFooter'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -158,7 +158,7 @@ export default function AboutPage() {
   return (
     <main ref={containerRef} className="bg-[#E5E5E5] text-black w-full min-h-screen font-sans selection:bg-black selection:text-white">
       
-      <Navbar />
+      {/* <Navbar /> */}
 
       {/* SECTION 1: EDITORIAL HERO */}
       <section className="hero-container relative w-full bg-[#E5E5E5] z-0 flex flex-col h-[150vh]">
@@ -202,6 +202,7 @@ export default function AboutPage() {
               <p className="font-mono text-xs md:text-sm mt-12 max-w-sm opacity-80 uppercase tracking-widest leading-relaxed">
                 Good Design is as little design as possible. I strive to create work that is honest in its materiality and efficient in its use of resources, while still being poetic and engaging to experience.
               </p>
+
             </div>
 
             <div className="md:col-span-4 flex flex-col gap-4 md:gap-6">

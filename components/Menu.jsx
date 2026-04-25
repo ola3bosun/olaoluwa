@@ -6,25 +6,10 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import TransitionLink from './TransitionLink'
 
-const defaultImages = [
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
-  "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6",
-  "https://images.unsplash.com/photo-1592078615290-033ee584e267"
-]
-
-const menuLinks = [
-  { title: "About", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6", href: "/about" },
-  { title: "Contact", image: "https://images.unsplash.com/photo-1592078615290-033ee584e267", href: "/contact" },
-  { title: "Shop", image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511", href: "/shop" } 
-]
-
-const allImages = Array.from(new Set([...defaultImages, ...menuLinks.map(l => l.image)]))
-
 // --- THE STAGGERED TEXT ENGINE ---
 const AnimatedMenuText = ({ text }) => {
   return (
     <div className="relative flex overflow-hidden">
-      {/* 1. Default Layer: Bold Sans-Serif (Pushes UP on hover) */}
       <div className="flex">
         {text.split('').map((char, idx) => (
           <span
@@ -36,8 +21,6 @@ const AnimatedMenuText = ({ text }) => {
           </span>
         ))}
       </div>
-
-      {/* 2. Hover Layer: Elegant Serif (Pulls UP from below on hover) */}
       <div className="absolute top-0 left-0 flex text-[#E5E5E5]">
         {text.split('').map((char, idx) => (
           <span
@@ -53,7 +36,8 @@ const AnimatedMenuText = ({ text }) => {
   )
 }
 
-export default function Menu({ isOpen, toggleMenu }) {
+// Add 'settings' to the incoming props
+export default function Menu({ isOpen, toggleMenu, settings }) {
   const overlayRef = useRef(null)
   const floatingImageRef = useRef(null)
   const imagesContainerRef = useRef(null) 
@@ -64,7 +48,25 @@ export default function Menu({ isOpen, toggleMenu }) {
   
   const [currentIdx, setCurrentIdx] = useState(0)
   const [hoveredImage, setHoveredImage] = useState(null)
-  const [abujaTime, setAbujaTime] = useState("...")
+  const [localTime, setLocalTime] = useState("...")
+
+  // --- DYNAMIC SANITY DATA WITH FALLBACKS ---
+  const bioText = settings?.menuBio || "Thanks for stopping by. I'm currently a designer based in Abuja, crafting architecture, interiors and furniture that respond to climate and craft. Feel free to explore the site and get in touch if you'd like to collaborate or just say hi. oh, I do photography in my leisure time too. Check out the shop for prints and pieces of my projects."
+  const locationText = settings?.location || "ABUJA, NG"
+  
+  const defaultImages = settings?.menuImages?.length > 0 ? settings.menuImages : [
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+    "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6",
+    "https://images.unsplash.com/photo-1592078615290-033ee584e267"
+  ]
+
+  const menuLinks = [
+    { title: "About", image: defaultImages[0] || "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6", href: "/about" },
+    { title: "Contact", image: defaultImages[1] || "https://images.unsplash.com/photo-1592078615290-033ee584e267", href: "/contact" },
+    { title: "Shop", image: defaultImages[2] || "https://images.unsplash.com/photo-1505691938895-1758d7feb511", href: "/shop" } 
+  ]
+
+  const allImages = Array.from(new Set([...defaultImages, ...menuLinks.map(l => l.image)]))
 
   const displayImage = hoveredImage || defaultImages[currentIdx]
   const prevImageRef = useRef(displayImage)
@@ -75,7 +77,7 @@ export default function Menu({ isOpen, toggleMenu }) {
         timeZone: 'Africa/Lagos',
         hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
       });
-      setAbujaTime(`${formatter.format(new Date())}`);
+      setLocalTime(`${formatter.format(new Date())}`);
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
@@ -88,7 +90,7 @@ export default function Menu({ isOpen, toggleMenu }) {
       setCurrentIdx((prev) => (prev + 1) % defaultImages.length)
     }, 5000) 
     return () => clearInterval(timer)
-  }, [hoveredImage])
+  }, [hoveredImage, defaultImages.length])
 
   // GSAP Menu Shutter Animation
   useGSAP(() => {
@@ -183,13 +185,13 @@ export default function Menu({ isOpen, toggleMenu }) {
       </div>
 
       <nav className="absolute top-0 w-full flex justify-between items-center p-2 uppercase font-mono text-sm tracking-widest z-50 pointer-events-none">
-          <TransitionLink href="/" className="pointer-events-auto" >
+          <TransitionLink href="/" className="pointer-events-auto" onClick={toggleMenu} >
             OD
           </TransitionLink>
         
         <div className="hidden md:block text-xs opacity-80 text-center w-48 pointer-events-auto mix-blend-difference text-[#000000]">
-          ABUJA, NG <br/>
-          {abujaTime}
+          {locationText} <br/>
+          {localTime}
         </div>
 
         <button 
@@ -201,9 +203,9 @@ export default function Menu({ isOpen, toggleMenu }) {
       </nav>
 
       <div className="w-full md:w-1/2 h-full flex flex-col relative z-10 bg-[#f4f4f4]">
-        <div className="flex-1 px-4 md:px-8 pt- md:pt-32 shrink-0">
+        <div className="flex-1 px-4 md:px-8 pt-8 md:pt-32 shrink-0">
           <p className="text-[16px] md:text-base font-italic uppercase leading-tight max-w-lg">
-            Thanks for stopping by. I'm currently a designer based in Abuja, crafting architecture, interiors and furniture that respond to climate and craft. Feel free to explore the site and get in touch if you'd like to collaborate or just say hi.oh, I do photography in my leisure time too. Check out the shop for prints and pieces of my projects.
+            {bioText}
           </p>
         </div>
 
@@ -230,7 +232,11 @@ export default function Menu({ isOpen, toggleMenu }) {
             </TransitionLink>
           ))}
 
-          <div className="p-4 md:p-6 lg:p-8 text-sm font-mono uppercase tracking-widest border-b border-black hover:bg-black hover:text-white transition-colors duration-500 cursor-pointer group">
+          <TransitionLink 
+            href="/contact" 
+            onClick={toggleMenu}
+            className="p-4 md:p-6 lg:p-8 text-sm font-mono uppercase tracking-widest border-b border-black hover:bg-black hover:text-white transition-colors duration-500 cursor-pointer group block"
+          >
             <div className="overflow-hidden">
               <div className="menu-text-stagger flex items-center">
                 <span className="inline-block w-0 overflow-hidden group-hover:w-4 group-hover:mr-2 transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] text-[#E5E5E5]">
@@ -239,7 +245,7 @@ export default function Menu({ isOpen, toggleMenu }) {
                 ANYTHING ELSE?
               </div>
             </div>
-          </div>
+          </TransitionLink>
         </div>
       </div>
 
