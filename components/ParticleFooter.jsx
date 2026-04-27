@@ -22,7 +22,7 @@ export default function ParticleFooter() {
       friction: 0.85,    // Slides slightly before stopping
       color: '#f4f4f4',  // Off-white to match your site's bright theme
       fontSize: 200,     // Massive typography
-      fontFamily: 'serif',
+      fontFamily: 'serif', //pencerio
       fontWeight: '600'
     }
 

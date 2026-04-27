@@ -24,9 +24,11 @@ export const GALLERY_QUERY = groq`*[_type == "project"] | order(order asc) {
 }`
 
 // This query grabs everything from the 'siteSettings' schema for the home page, including the slider images and contact and menu
+
 export const SETTINGS_QUERY = groq`*[_type == "siteSettings"][0] {
   menuBio,
   location,
+  // Compresses the desktop slider images to 1200px WebP for instant loading
   "menuImages": menuImages[].asset->url + "?auto=format&w=1200&fit=max&q=75",
   "sliderImages": contactImages[].asset->url + "?auto=format&w=2000&fit=max&q=75",
   email,

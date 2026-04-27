@@ -13,7 +13,7 @@ export default function PageTransition() {
   const textGroup = [...Array(8)].fill("OLAOLUWA")
 
   useGSAP(() => {
-    // 1. Initialize the infinite marquees
+    // Initialize the infinite marquees
     const leftLoop = gsap.to(".marquee-left", {
       xPercent: -50, ease: "none", duration: 8, repeat: -1, paused: true
     })
@@ -21,12 +21,12 @@ export default function PageTransition() {
       { xPercent: -50 }, { xPercent: 0, ease: "none", duration: 8, repeat: -1, paused: true }
     )
 
-    // 2. Define the trigger sequence
+    //  the trigger sequence
     const playTransition = (e) => {
       const href = e.detail
       const tl = gsap.timeline()
 
-      // --- SETUP (Completely invisible to the user) ---
+      // SETUP (Completely invisible to the user)
       // Force the marquee to opacity 0 and panel above screen BEFORE showing the container
       gsap.set(".marquee-container", { opacity: 0, scale: 1.1, rotate: -2 })
       gsap.set(".bg-panel", { yPercent: -100 })
@@ -35,15 +35,14 @@ export default function PageTransition() {
       leftLoop.timeScale(1).play()
       rightLoop.timeScale(1).play()
 
-      // --- THE TIMELINE ---
 
-      // Phase 1: Slam panel down completely. 
+      // Drop panel 
       tl.to(".bg-panel", { yPercent: 0, duration: 0.5, ease: "expo.inOut" })
 
-      // Phase 2: Only after the screen is black, show the marquee
+      // Only after the screen is black, show the marquee
       tl.to(".marquee-container", { opacity: 1, duration: 0.2 }, "+=0.05")
 
-      // Phase 3: Accelerate the marquees
+      // Accelerate the marquees
       tl.to([leftLoop, rightLoop], { timeScale: 4, duration: 0.4, ease: "power2.in" }, "<")
 
       // Phase 4: THE SNAP (Sudden stop)
@@ -52,10 +51,9 @@ export default function PageTransition() {
     //     rightLoop.pause()
     //   })
 
-      // Phase 5: Fade text out, leaving a pure black screen
+      //  Fade text out, leaving a pure black screen
     //   tl.to(".marquee-container", { opacity: 0, duration: 0.2 }, "+=0.15")
 
-      // Phase 6: Router Push & The React Buffer
       // We push the route, then leave the screen black for 300ms ("+=0.3") 
       // so Next.js can reconcile the DOM without making GSAP stutter.
      // Tell Next.js to swap the DOM in the background
@@ -76,7 +74,6 @@ export default function PageTransition() {
       }, "+=0.8") // 
     }
 
-    // 3. Attach the event listener
     window.addEventListener('trigger-transition', playTransition)
 
     return () => {
