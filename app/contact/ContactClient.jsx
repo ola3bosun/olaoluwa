@@ -75,7 +75,7 @@ export default function ContactClient({ settings }) {
               alt={`Studio Slide ${idx + 1}`} 
               fill 
               sizes="(max-width: 768px) 100vw, 55vw"
-              className="object-cover grayscale"
+              className="object-cover"
               priority={idx === 0}
             />
           </div>
