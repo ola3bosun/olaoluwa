@@ -324,15 +324,16 @@ export default function GalleryClient({ initialProjects }) {
       </div>
 
       {/* 5. CUSTOM CURSOR & HOVER INTERACTION LAYER */}
-      <div 
+     <div 
         className="hide-global-cursor absolute inset-0 z-30 ml-[15%] cursor-none pointer-events-auto"
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={() => {
-          // Only fire if the project actually exists
           if (filteredProjects[currentIndex]) {
-            console.log('Route to project:', filteredProjects[currentIndex]._id)
+            // FIRE THE GLOBAL SHUTTER TRANSITION
+            const projectId = filteredProjects[currentIndex]._id;
+            window.dispatchEvent(new CustomEvent('trigger-transition', { detail: `/gallery/${projectId}` }));
           }
         }}
       />
