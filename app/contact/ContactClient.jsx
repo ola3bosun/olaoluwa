@@ -59,7 +59,7 @@ export default function ContactClient({ settings }) {
         <TransitionLink href="/" className="pointer-events-auto hover:opacity-50 transition-opacity">
           ← BACK TO INDEX
         </TransitionLink>
-        <div className="hidden md:block">OLAOLUWA</div>
+        <div className="hidden md:block font-logo">O.D</div>
       </nav>
 
       {/* LEFT HALF: Absolute GSAP Container */}

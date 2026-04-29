@@ -17,6 +17,16 @@
   cursor: none;
   /* scrollbar-width: none; Firefox */
   /* -ms-overflow-style: none; Internet Explorer 10+ */
+}
+
+@theme {
+  /* This overwrites the default font-sans with your Inter font */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   
+  /* This creates your custom 'font-logo' class for Playwrite */
+  --font-logo: var(--font-playwrite), serif;
+  
+  /* Keeps the default monospace for your brackets and terminal text */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 

@@ -1,5 +1,6 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
+import { Playwrite_NO } from 'next/font/google'
 import Cursor from '../components/Cursor'
 import PreLoader from '../components/Preloader'
 import PageTransition from '../components/PageTransition'
@@ -9,11 +10,17 @@ import { client } from '@/sanity/client'
 import { SETTINGS_QUERY } from '@/sanity/queries'
 import ConditionalNavbar from '@/components/ConditionalNavbar'
 
-// 2. Initialize the variable font
-const inter = Inter({ 
+//  Configure Inter 
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
+})
+
+//  Configure Playwrite Norge (The Logo Font)
+const playwriteNorge = Playwrite_NO({
+  display: 'swap',
+  variable: '--font-playwrite',
 })
 
 export const metadata = {
@@ -31,7 +38,7 @@ export default async function RootLayout({ children }) {
   const settings = await client.fetch(SETTINGS_QUERY).catch(() => null)
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${playwriteNorge.variable}`}>
       <body className={`${inter.variable} font-sans antialiased bg-[#E5E5E5] text-black overflow-hidden`}>
         <PreLoader />
         <PageTransition />

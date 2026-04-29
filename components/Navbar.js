@@ -35,14 +35,8 @@ export default function Navbar({ settings }) {
     <>
       <nav className="fixed top-0 left-0 w-full z-[200] flex justify-between items-center p-4 md:px-8 md:pt-6 uppercase text-sm tracking-widest pointer-events-none mix-blend-difference text-[#f5f5f5]">
 
-        <TransitionLink 
-          href="/" 
-          onClick={() => setIsOpen(false)}
-          className="pointer-events-auto font-mono text-xs md:text-sm font-bold tracking-widest hover:opacity-50 transition-opacity flex items-center gap-2"
-        >
-          <span className="opacity-50">[</span>
-          O.D.
-          <span className="opacity-50">]</span>
+        <TransitionLink href="/" className="pointer-events-auto font-logo text-lg">
+          O.D
         </TransitionLink>
         
         <div className="hidden md:block text-xs opacity-80 text-center w-48 pointer-events-auto">

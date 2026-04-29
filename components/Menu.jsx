@@ -54,9 +54,9 @@ export default function Menu({ isOpen, toggleMenu, settings }) {
     settings?.menuBio ||
     "Thanks for stopping by. I'm currently a designer based in Abuja, crafting architecture, interiors and furniture that respond to climate and craft. Feel free to explore the site and get in touch if you'd like to collaborate or just say hi. oh, I do photography in my leisure time too. Check out the shop for prints and pieces of my projects.";
   const mobileBioText =
-    "STRUCTURAL ENGINEERING FOR THE NEXT CENTURY. MINIMALISM THROUGH PRECISION.";
-  const mobileLocationText = "LOS / ABUJA / NYC";
-  const emailText = settings?.email || "INFO@OLAOLUWA.COM";
+    "{biotext}";
+  const mobileLocationText = "LOS / ABUJA";
+  const emailText = settings?.email || "DIYAOLAOLUWA@GMAIL.COM";
 
   const sanityImages = settings?.menuImages || [];
   const defaultImages =
@@ -117,7 +117,7 @@ export default function Menu({ isOpen, toggleMenu, settings }) {
     if (hoveredImage || window.innerWidth < 768) return;
     const timer = setInterval(() => {
       setCurrentIdx((prev) => (prev + 1) % defaultImages.length);
-    }, 5000);
+    }, 7000);
     return () => clearInterval(timer);
   }, [hoveredImage, defaultImages.length]);
 
@@ -238,7 +238,7 @@ export default function Menu({ isOpen, toggleMenu, settings }) {
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[100] h-[100dvh] overflow-hidden"
+      className="fixed inset-0 z-100 h-100dvh overflow-hidden"
       style={{ transform: "translateY(-100%)" }}
     >
       {/*MOBILE UI*/}
@@ -306,13 +306,11 @@ export default function Menu({ isOpen, toggleMenu, settings }) {
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* 2. DESKTOP UI                                               */}
-      {/* ========================================================= */}
+      {/*DESKTOP UI*/}
       <div className="hidden md:flex w-full h-full flex-row bg-[#E5E5E5] text-black font-sans relative">
         <div
           ref={floatingImageRef}
-          className="fixed top-0 left-0 z-[150] w-64 h-40 pointer-events-none overflow-hidden bg-neutral-900 shadow-2xl opacity-0 scale-75"
+          className="fixed top-0 left-0 z-150 w-64 h-40 pointer-events-none overflow-hidden bg-neutral-900 shadow-2xl opacity-0 scale-75"
         >
           {hoveredImage && (
             <Image

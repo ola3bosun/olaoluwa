@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
-import TextPressure from "@/components/TextPressure"; // Adjust path if needed
+import TextPressure from "@/components/TextPressure";
 
 export default function HomeClient({ settings }) {
   // Dynamic data with fallbacks
@@ -12,10 +12,6 @@ export default function HomeClient({ settings }) {
   return (
     <main className="h-screen w-screen overflow-hidden bg-[#E5E5E5] text-black flex flex-col font-sans relative">
       
-      {/* NOTE: Navbar and Menu are GONE. 
-        They are now injected globally via layout.jsx! 
-      */}
-
       <div className="flex-1 w-full flex flex-col min-h-0 relative pb-6 md:pb-8 pt-24 md:pt-32">
         
         <div className="flex-1 w-full relative flex items-center justify-center overflow-visible">

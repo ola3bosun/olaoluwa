@@ -276,7 +276,7 @@ export default function GalleryClient({ initialProjects }) {
           ))}
         </div>
 
-        <div className="w-32 flex justify-end font-bold drop-shadow-md">
+        <div className="w-32 flex justify-end font-logo font-bold drop-shadow-md">
           OLAOLUWA
         </div>
       </nav>
