@@ -296,7 +296,7 @@ export default function Menu({ isOpen, toggleMenu, settings }) {
             </div>
           </div>
           <div className="flex justify-between items-end border-t border-black/20 pt-4">
-            <div className="max-w-[200px] leading-[1.6] opacity-60">
+            <div className="max-w-50 leading-[1.6] opacity-60">
               {mobileBioText}
             </div>
             <div className="font-bold opacity-80">

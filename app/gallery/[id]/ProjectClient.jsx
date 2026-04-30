@@ -147,11 +147,11 @@ const nextImg = children[currentIndex];
             
             <div className="grid grid-cols-3 gap-6 font-mono text-[10px] md:text-xs uppercase tracking-widest opacity-80">
               <div className="flex flex-col gap-1">
-                <span className="opacity-50">TYPE</span>
+                <span className="opacity-50">CATEGORY</span>
                 <span>{project.category}</span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="opacity-50">LOC</span>
+                <span className="opacity-50">LOCATION</span>
                 <span>{project.location}</span>
               </div>
               <div className="flex flex-col gap-1">
@@ -164,7 +164,7 @@ const nextImg = children[currentIndex];
           {images.length > 1 && (
             <div className="w-full md:w-auto flex flex-col items-end gap-3 ui-layer shrink-0">
               <div className="font-mono text-[10px] uppercase tracking-widest opacity-60">
-                [ ELEVATION 0{currentIndex + 1} / 0{images.length} ]
+                [ 0{currentIndex + 1} / 0{images.length} ]
               </div>
               
               <div className="flex flex-wrap justify-end gap-2 md:gap-3">
