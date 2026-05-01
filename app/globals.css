@@ -11,10 +11,14 @@
   color: #fff;
 }
 
+body{
+  overflow-x: hidden;
+}
+
 * {
   /* scrollbar-width: thin; */
   /* scrollbar-color: gray transparent; */
-  cursor: none;
+  /* cursor: none; */
   /* scrollbar-width: none; Firefox */
   /* -ms-overflow-style: none; Internet Explorer 10+ */
 }

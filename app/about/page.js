@@ -156,7 +156,7 @@ export default function AboutPage() {
   }, { scope: containerRef })
 
   return (
-    <main ref={containerRef} className="bg-[#E5E5E5] text-black w-full min-h-screen font-sans selection:bg-black selection:text-white">
+    <main suppressHydrationWarning ref={containerRef} className="bg-[#E5E5E5] text-black w-full min-h-screen font-sans selection:bg-black selection:text-white">
       
       {/* <Navbar /> */}
 

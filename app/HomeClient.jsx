@@ -10,7 +10,7 @@ export default function HomeClient({ settings }) {
   const bioText = settings?.homeBio || "Abuja based designer crafting architecture, interiors and furniture that respond to climate and craft.";
 
   return (
-    <main className="h-screen w-screen overflow-hidden bg-[#E5E5E5] text-black flex flex-col font-sans relative">
+    <main suppressHydrationWarning className="h-screen w-screen overflow-hidden bg-[#E5E5E5] text-black flex flex-col font-sans relative">
       
       <div className="flex-1 w-full flex flex-col min-h-0 relative pb-6 md:pb-8 pt-24 md:pt-32">
         
