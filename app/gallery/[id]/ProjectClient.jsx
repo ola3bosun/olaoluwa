@@ -9,7 +9,7 @@ import TransitionLink from '@/components/TransitionLink'
 export default function ProjectClient({ project }) {
   const containerRef = useRef(null)
   const imagesContainerRef = useRef(null)
-  const isInitialMount = useRef(true) // Stops the 3D flip from running on first load
+  const isInitialMount = useRef(true)
   
   // Combine cover image and gallery images into one array
   const images = project.gallery && project.gallery.length > 0 
@@ -19,7 +19,7 @@ export default function ProjectClient({ project }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const timerRef = useRef(null)
 
-  // --- 7-SECOND AUTO-CYCLE ENGINE ---
+  // 7-SECOND AUTO-CYCLE ENGINE
   const startTimer = () => {
     clearInterval(timerRef.current)
     if (images.length > 1) {
@@ -41,11 +41,10 @@ export default function ProjectClient({ project }) {
     }
   }
 
-  // --- 1. INITIAL MOUNT REVEALS ---
+  // INITIAL MOUNT REVEALS
   useGSAP(() => {
     const tl = gsap.timeline()
     
-    // Instead of fromTo, we use 'from'. If GSAP breaks, it defaults to visible.
     tl.from(imagesContainerRef.current, 
       { scale: 1.05, opacity: 0, duration: 1.5, ease: "power3.out" }
     )
@@ -55,7 +54,7 @@ export default function ProjectClient({ project }) {
     )
   }, { scope: containerRef })
 
-  // --- 2. THE 3D BILLBOARD FLIP ENGINE ---
+  // THE 3D BILLBOARD FLIP ENGINE
   useGSAP(() => {
     if (!imagesContainerRef.current) return
     const children = imagesContainerRef.current.children
@@ -86,7 +85,8 @@ const nextImg = children[currentIndex];
       scale: 1.15,
       xPercent: -1.5, // The 10-15px lateral drift
       duration: 7,
-      ease: "none"
+      ease: "power1.inOut", // A gentle ease for the slow pan. revisit this
+      overwrite: "auto" // This ensures that if the user hovers a new thumbnail before the current animation finishes, it will kill the ongoing tween and start fresh on the new image
     });
 
     // Outgoing panels swing away into the deep background on the left
@@ -108,12 +108,12 @@ const nextImg = children[currentIndex];
   return (
     <main ref={containerRef} className="relative w-full min-h-screen bg-[#E5E5E5] font-sans selection:bg-white selection:text-black">
       
-      {/* 1. BACKGROUND LAYER: FULL BLEED HERO */}
+      {/* BACKGROUND LAYER: FULL BLEED HERO */}
       <div className="absolute top-0 left-0 w-full h-[85vh] overflow-hidden z-0 bg-neutral-900">
 
         <div ref={imagesContainerRef} className="relative w-full h-full perspective-[10000px]">
           {images.map((src, idx) => (
-            // Removed opacity-0 from Tailwind
+
             <div key={idx} className="absolute inset-0 w-full h-full">
               <Image 
                 src={src}
@@ -129,7 +129,7 @@ const nextImg = children[currentIndex];
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/10 to-black/60 pointer-events-none z-20" />
       </div>
 
-      {/* 2. FOREGROUND LAYER: FLOATING UI */}
+      {/* FOREGROUND LAYER: FLOATING UI */}
       <div className="relative z-10 w-full h-[85vh] flex flex-col justify-between px-4 md:px-8 pt-24 md:pt-32 pb-8 text-white pointer-events-none">
         
         <div className="ui-layer pointer-events-auto">
@@ -141,9 +141,13 @@ const nextImg = children[currentIndex];
         <div className="flex flex-col md:flex-row justify-between items-end gap-8 w-full pointer-events-auto">
           
           <div className="w-full md:w-1/2 flex flex-col gap-6 ui-layer">
-            <h1 className="font-sans text-white mix-blend-difference text-5xl md:text-7xl font-black tracking-tighter leading-none uppercase">
+            <h1 className="font-sans text-white mix-blend-difference text-5xl md:text-7xl font-black tracking-tight leading-none uppercase">
               {project.title}
             </h1>
+
+            <p className='font-sans text-white/80 font-regular font-italic mix-blend-difference tracking-wide leading-none'>
+              {project.description}
+            </p>
             
             <div className="grid grid-cols-3 gap-6 font-mono text-[10px] md:text-xs uppercase tracking-widest opacity-80">
               <div className="flex flex-col gap-1">
