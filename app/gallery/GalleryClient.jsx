@@ -79,10 +79,10 @@ export default function GalleryClient({ initialProjects }) {
     const currentImg = imagesRef.current[currentIndexRef.current]
     const currentText = textsRef.current[currentIndexRef.current]
 
-    // 1. Filter out any null/undefined elements safely
+    // Filter out any null/undefined elements safely
     const targets = [currentImg, currentText].filter(Boolean)
 
-    // 2. If the current category was empty, there's nothing to slide out. Just switch immediately.
+    // If the current category was empty, there's nothing to slide out. Just switch immediately.
     if (targets.length === 0) {
       currentIndexRef.current = 0
       setCurrentIndex(0)
@@ -90,7 +90,7 @@ export default function GalleryClient({ initialProjects }) {
       return
     }
 
-    // 3. Otherwise, lock the animation state and slide out violently
+    // Otherwise, lock the animation state and slide out violently
     isAnimating.current = true
     isCategoryTransition.current = true
 
