@@ -16,11 +16,9 @@ body{
 }
 
 * {
-  /* scrollbar-width: thin; */
-  /* scrollbar-color: gray transparent; */
-  /* cursor: none; */
-  /* scrollbar-width: none; Firefox */
-  /* -ms-overflow-style: none; Internet Explorer 10+ */
+  scrollbar-width: thin; 
+  scrollbar-color: gray transparent;
+  cursor: none;
 }
 
 @theme {

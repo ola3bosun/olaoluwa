@@ -39,6 +39,11 @@ export default function PageTransition() {
       // Drop panel 
       tl.to(".bg-panel", { yPercent: 0, duration: 0.5, ease: "expo.inOut" })
 
+      // Tell Next.js to swap the DOM in the background
+      // We push the route change to the timeline so it happens in sync with the animation. This way, we avoid any flashes of unstyled content or layout shifts, as Next.js will have already reconciled the new page's DOM before we start animating the transition out.
+      // so Next.js can reconcile the DOM without making GSAP stutter.
+      tl.add(() => router.push(href))
+
       // Only after the screen is black, show the marquee
       tl.to(".marquee-container", { opacity: 1, duration: 0.2 }, "+=0.05")
 
@@ -46,18 +51,10 @@ export default function PageTransition() {
       tl.to([leftLoop, rightLoop], { timeScale: 4, duration: 0.4, ease: "power2.in" }, "<")
 
       // Phase 4: THE SNAP (Sudden stop)
-    //   tl.add(() => {
-    //     leftLoop.pause()
-    //     rightLoop.pause()
-    //   })
-
-      //  Fade text out, leaving a pure black screen
-    //   tl.to(".marquee-container", { opacity: 0, duration: 0.2 }, "+=0.15")
-
-      // We push the route, then leave the screen black for 300ms ("+=0.3") 
-      // so Next.js can reconcile the DOM without making GSAP stutter.
-     // Tell Next.js to swap the DOM in the background
-      tl.add(() => router.push(href))
+      // tl.add(() => {
+      //   leftLoop.pause()
+      //   rightLoop.pause()
+      // })
 
       // Fade text out
       tl.to(".marquee-container", { opacity: 0, duration: 0.2 }, "+=0.5")
@@ -71,7 +68,7 @@ export default function PageTransition() {
         onComplete: () => {
           gsap.set(containerRef.current, { display: "none", pointerEvents: "none" })
         }
-      }, "+=0.8") // 
+      }, "+=0.8")
     }
 
     window.addEventListener('trigger-transition', playTransition)
