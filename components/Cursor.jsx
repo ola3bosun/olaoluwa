@@ -23,7 +23,7 @@ export default function Cursor() {
     }
 
     const handleMouseOver = (e) => {
-      // If we enter the gallery's custom interaction zone, hide the global cursor
+      // on entering the gallery's custom interaction zone, hide the global cursor
       if (e.target.closest('.hide-global-cursor')) {
         setCursorMode('hidden')
         return

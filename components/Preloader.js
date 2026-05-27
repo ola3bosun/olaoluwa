@@ -89,7 +89,7 @@ export default function Preloader() {
         <div className="w-full flex justify-between items-end mb-4">
           <div className="text-xs uppercase tracking-widest opacity-50 flex flex-col">
             <span>OLAOLUWA DIYAOLU</span>
-            <span>LOADING EXPERIENCE</span>
+            <span>LOADING...</span>
           </div>
           
           <div className="text-5xl md:text-8xl font-black tracking-tighter leading-none flex items-baseline">

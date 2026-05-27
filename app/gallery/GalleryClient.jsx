@@ -9,7 +9,6 @@ import TransitionLink from '@/components/TransitionLink'
 
 gsap.registerPlugin(Observer)
 
-// FALLBACK DATA (Used only if Sanity is empty during testing)
 const fallbackProjects = [
   { _id: '1', category: "ARCHITECTURE", title: "Ikoyi Residence", location: "Lagos, NG", year: "2023", imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" },
   { _id: '2', category: "ARCHITECTURE", title: "Concrete Pavilion", location: "Kano, NG", year: "2023", imageUrl: "https://images.unsplash.com/photo-1505691938895-1758d7feb511" },
@@ -43,46 +42,50 @@ export default function GalleryClient({ initialProjects }) {
 
   const categories = ['ARCHITECTURE', 'INTERIOR', 'FURNITURE']
 
-  // INJECT SANITY DATA HERE
-  // If Sanity returns an array with items, use it. Otherwise, use the fallback.
   const allProjects = initialProjects?.length > 0 ? initialProjects : fallbackProjects
-  
   const filteredProjects = allProjects.filter(p => p.category.toUpperCase() === activeCategory)
 
-  // PREVENT GHOSTING: Strictly assign exact array length before render
-  imagesRef.current = new Array(filteredProjects.length).fill(null)
-  textsRef.current = new Array(filteredProjects.length).fill(null)
+  // FIX 3: Safe Ref Reset. Reset arrays safely at the start of render to avoid React Strict Mode mutation bugs.
+  imagesRef.current = []
+  textsRef.current = []
 
+  // Custom Cursor Tracker
   useGSAP(() => {
     xMove.current = gsap.quickTo(cursorRef.current, "left", { duration: 0.4, ease: "power3.out" })
     yMove.current = gsap.quickTo(cursorRef.current, "top", { duration: 0.4, ease: "power3.out" })
   })
 
-  useGSAP(() => {
-    const activeIdx = categories.indexOf(activeCategory)
-    const activeTab = tabsRef.current[activeIdx]
-    
-    if (activeTab && indicatorRef.current) {
-      gsap.to(indicatorRef.current, {
-        x: activeTab.offsetLeft,
-        width: activeTab.offsetWidth,
-        duration: 0.6,
-        ease: "expo.out"
-      })
+  // FIX 4: Indicator Line Alignment. Added window resize listener to keep the line snapped.
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeIdx = categories.indexOf(activeCategory)
+      const activeTab = tabsRef.current[activeIdx]
+      
+      if (activeTab && indicatorRef.current) {
+        gsap.to(indicatorRef.current, {
+          x: activeTab.offsetLeft,
+          width: activeTab.offsetWidth,
+          duration: 0.6,
+          ease: "expo.out",
+          overwrite: "auto"
+        })
+      }
     }
+
+    updateIndicator() // Run on mount/category change
+    window.addEventListener('resize', updateIndicator)
+    return () => window.removeEventListener('resize', updateIndicator)
   }, [activeCategory])
 
   // CATEGORY SWITCH LOGIC
- const handleCategorySwitch = (targetCat) => {
+  const handleCategorySwitch = (targetCat) => {
     if (targetCat === activeCategory || isAnimating.current) return
 
     const currentImg = imagesRef.current[currentIndexRef.current]
     const currentText = textsRef.current[currentIndexRef.current]
 
-    // Filter out any null/undefined elements safely
     const targets = [currentImg, currentText].filter(Boolean)
 
-    // If the current category was empty, there's nothing to slide out. Just switch immediately.
     if (targets.length === 0) {
       currentIndexRef.current = 0
       setCurrentIndex(0)
@@ -90,7 +93,6 @@ export default function GalleryClient({ initialProjects }) {
       return
     }
 
-    // Otherwise, lock the animation state and slide out violently
     isAnimating.current = true
     isCategoryTransition.current = true
 
@@ -100,7 +102,6 @@ export default function GalleryClient({ initialProjects }) {
       duration: 0.8,
       ease: "power3.inOut",
       onComplete: () => {
-        // Only switch React state AFTER the exit animation finishes
         currentIndexRef.current = 0
         setCurrentIndex(0)
         setActiveCategory(targetCat)
@@ -110,6 +111,13 @@ export default function GalleryClient({ initialProjects }) {
 
   // INITIALIZATION & CATEGORY INCOMING ANIMATION
   useGSAP(() => {
+    // FIX 1: Empty Category Lockup. Immediately unlock animations if there are no projects to animate in.
+    if (filteredProjects.length === 0) {
+      isAnimating.current = false
+      isCategoryTransition.current = false
+      return
+    }
+
     gsap.set(imagesRef.current, { opacity: 0, zIndex: 0, clearProps: "transform" })
     gsap.set(textsRef.current, { opacity: 0, zIndex: 0, clearProps: "transform", yPercent: 100 })
     
@@ -118,7 +126,6 @@ export default function GalleryClient({ initialProjects }) {
 
     if (firstImg && firstText) {
       if (isCategoryTransition.current) {
-        // If we are arriving from a category switch, slide in from the right
         gsap.fromTo(firstImg, 
           { xPercent: 100, opacity: 0, zIndex: 1 }, 
           { xPercent: 0, opacity: 1, duration: 0.8, ease: "power3.inOut" }
@@ -133,7 +140,6 @@ export default function GalleryClient({ initialProjects }) {
           }
         )
       } else {
-        // Standard hard-load reveal
         gsap.set(firstImg, { opacity: 1, zIndex: 1 })
         gsap.set(firstText, { opacity: 1, zIndex: 1, yPercent: 0 })
       }
@@ -158,45 +164,47 @@ export default function GalleryClient({ initialProjects }) {
       }
     })
 
-    // Outgoing Vertical
-    tl.to(currentImg, { yPercent: direction * -15, scale: 0.85, opacity: 0, duration: 1, ease: "power3.inOut" }, 0)
-    tl.to(currentText, { yPercent: direction * -100, opacity: 0, duration: 0.8, ease: "power3.inOut" }, 0)
+    if (currentImg && currentText) {
+      tl.to(currentImg, { yPercent: direction * -15, scale: 0.85, opacity: 0, duration: 1, ease: "power3.inOut" }, 0)
+      tl.to(currentText, { yPercent: direction * -100, opacity: 0, duration: 0.8, ease: "power3.inOut" }, 0)
+    }
 
-    // Incoming Setup
-    gsap.set(nextImg, { yPercent: direction * 15, xPercent: 0, scale: 1.15, opacity: 0, zIndex: 10 })
-    gsap.set(nextText, { yPercent: direction * 100, xPercent: 0, opacity: 0, zIndex: 10 })
+    if (nextImg && nextText) {
+      gsap.set(nextImg, { yPercent: direction * 15, xPercent: 0, scale: 1.15, opacity: 0, zIndex: 10 })
+      gsap.set(nextText, { yPercent: direction * 100, xPercent: 0, opacity: 0, zIndex: 10 })
 
-    // Incoming Vertical
-    tl.to(nextImg, { yPercent: 0, scale: 1, opacity: 1, duration: 1, ease: "power3.inOut" }, 0)
-    tl.to(nextText, { yPercent: 0, opacity: 1, duration: 1, ease: "power3.out" }, 0.2)
+      tl.to(nextImg, { yPercent: 0, scale: 1, opacity: 1, duration: 1, ease: "power3.inOut" }, 0)
+      tl.to(nextText, { yPercent: 0, opacity: 1, duration: 1, ease: "power3.out" }, 0.2)
+    }
 
-    tl.set([currentImg, currentText], { zIndex: 0 })
+    tl.set([currentImg, currentText].filter(Boolean), { zIndex: 0 })
   }
 
   // EVENT BINDINGS (Scroll & Arrows)
   useGSAP(() => {
+    // FIX 2: Modulo Zero Crash. Early returns prevent the math errors if the category is empty.
     const handleNext = () => {
+      if (filteredProjects.length === 0) return
       const nextIdx = (currentIndexRef.current + 1) % filteredProjects.length
       gotoSlide(nextIdx, 1)
     }
 
     const handlePrev = () => {
+      if (filteredProjects.length === 0) return
       const prevIdx = (currentIndexRef.current - 1 + filteredProjects.length) % filteredProjects.length
       gotoSlide(prevIdx, -1)
     }
 
-    // 1. Observer Engine
     const observer = Observer.create({
       target: containerRef.current,
       type: "wheel,touch,pointer",
       wheelSpeed: -1,
-      tolerance: 40, // Increased tolerance to stop trackpad twitching
+      tolerance: 40, 
       preventDefault: true,
       onUp: handleNext,   
       onDown: handlePrev 
     })
 
-    // 2. Arrow Keys Engine
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowDown') handleNext()
       if (e.key === 'ArrowUp') handlePrev()
@@ -207,7 +215,7 @@ export default function GalleryClient({ initialProjects }) {
       observer.kill()
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, { dependencies: [activeCategory], scope: containerRef }) // Only rebuild bindings if the category data changes entirely
+  }, { dependencies: [activeCategory], scope: containerRef }) 
 
   // Mouse Overlays
   const handleMouseMove = (e) => {
@@ -225,7 +233,7 @@ export default function GalleryClient({ initialProjects }) {
     <main ref={containerRef} className="h-screen w-screen bg-black text-white overflow-hidden relative font-sans flex flex-col select-none">
       
       {/* ABSOLUTE FULL-BLEED IMAGES */}
-     <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+      <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
         
         {/* EMPTY STATE */}
         {filteredProjects.length === 0 && (
@@ -253,7 +261,7 @@ export default function GalleryClient({ initialProjects }) {
         ))}
       </div>
 
-      {/* 2. FLOATING TOP NAV & SLIDING INDICATOR */}
+      {/* FLOATING TOP NAV & SLIDING INDICATOR */}
       <nav className="absolute top-0 left-0 w-full p-4 md:px-8 md:pt-6 flex justify-between items-center uppercase font-mono text-xs md:text-sm tracking-widest z-50 pointer-events-none">
         <div className="w-32 flex justify-start pointer-events-auto">
           <TransitionLink href="/" className="hover:opacity-50 transition-opacity cursor-pointer drop-shadow-md">
@@ -281,7 +289,7 @@ export default function GalleryClient({ initialProjects }) {
         </div>
       </nav>
 
-      {/* 3. FLOATING LEFT THUMBNAILS */}
+      {/* FLOATING LEFT THUMBNAILS */}
       <div className="absolute left-0 top-0 h-full hidden md:flex flex-col justify-center pl-8 gap-4 w-[12%] z-20 pointer-events-none">
         {filteredProjects.map((project, idx) => {
           const isActive = idx === currentIndex;
@@ -300,7 +308,7 @@ export default function GalleryClient({ initialProjects }) {
               src={project.imageUrl}
               alt={project.title}
               fill
-              sizes="(max-width: 768px) 30vw, 15vw" // Mobile gets 30%, Desktop gets 15%
+              sizes="(max-width: 768px) 30vw, 15vw" 
               className="object-cover"
             />
             </button>
@@ -308,7 +316,7 @@ export default function GalleryClient({ initialProjects }) {
         })}
       </div>
 
-      {/* 4. ANIMATED DATA OVERLAYS */}
+      {/* ANIMATED DATA OVERLAYS */}
       <div className="absolute bottom-0 right-0 p-4 md:p-8 flex flex-col items-end w-full h-[30vh] overflow-hidden z-20 pointer-events-none">
         {filteredProjects.map((project, idx) => (
           <div 
@@ -323,15 +331,14 @@ export default function GalleryClient({ initialProjects }) {
         ))}
       </div>
 
-      {/* 5. CUSTOM CURSOR & HOVER INTERACTION LAYER */}
-     <div 
+      {/* CUSTOM CURSOR & HOVER INTERACTION LAYER */}
+      <div 
         className="hide-global-cursor absolute inset-0 z-30 ml-[15%] cursor-none pointer-events-auto"
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={() => {
           if (filteredProjects[currentIndex]) {
-            // FIRE THE GLOBAL SHUTTER TRANSITION
             const projectId = filteredProjects[currentIndex]._id;
             window.dispatchEvent(new CustomEvent('trigger-transition', { detail: `/gallery/${projectId}` }));
           }

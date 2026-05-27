@@ -20,7 +20,7 @@ export default function ParticleFooter() {
       repelForce: 10,     // Violent push away from the cursor
       spring: 0.25,      // Snaps back quickly
       friction: 0.85,    // Slides slightly before stopping
-      color: '#f4f4f4',  // Off-white to match your site's bright theme
+      color: '#f4f4f4',  
       fontSize: 200,     // Massive typography
       fontFamily: 'serif', //pencerio
       fontWeight: '600'

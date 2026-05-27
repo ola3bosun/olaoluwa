@@ -18,7 +18,7 @@ export default function Canvas404() {
       spring: 0.1,       
       friction: 0.85,    
       color: '#000000',  
-      fontSize: 350,     // Massive typography to match wireframe
+      fontSize: 350,    
       fontFamily: 'sans-serif',
       fontWeight: '900'
     }
@@ -42,7 +42,6 @@ export default function Canvas404() {
       offCtx.fillStyle = '#000000'
       offCtx.font = `${config.fontWeight} ${config.fontSize}px ${config.fontFamily}`
       
-      // ALIGN RIGHT: This ensures it hugs the right side of your layout
       offCtx.textAlign = 'right'
       offCtx.textBaseline = 'middle'
       offCtx.fillText(config.text, w - 20, h / 2)
